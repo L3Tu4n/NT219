@@ -35,6 +35,9 @@ from numpy import sqrt as npsqrt
 # For debugging purposes
 import time
 
+# Falcon
+import falcon
+
 # Tailcut rate
 tau = 14
 # Minimal size of a bucket for the chi-squared test (must be >= 5)
