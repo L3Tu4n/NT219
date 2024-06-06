@@ -42,9 +42,9 @@ class FalconSignature:
 
             signature = sk.sign(hash_value)
             save_pem(SIGNATURE_FILE, signature, "FALCON SIGNATURE")
-            print("PDF signed and signature saved successfully.")
+            return "PDF signed and signature saved successfully."
         except Exception as e:
-            print(f"Failed to sign PDF: {e}")
+            return f"Failed to sign PDF: {e}"
 
     def verify_pdf(self, pdf_path, owner, date, place):
         try:
@@ -70,8 +70,7 @@ class FalconSignature:
             is_valid = pk.verify(hash_value, signature)
             return is_valid
         except Exception as e:
-            print(f"Failed to verify PDF: {e}")
-            return False
+            return f"Failed to verify PDF: {e}"
 
 class SerializableSecretKey(falcon.SecretKey):
     def to_bytes(self):
@@ -97,7 +96,7 @@ def save_pem(filename, data, type):
         with open(filename, 'w') as f:
             f.write(pem_data)
     except Exception as e:
-        print(f"Failed to save PEM file {filename}: {e}")
+        return f"Failed to save PEM file {filename}: {e}"
 
 def load_pem(filename, type):
     try:
@@ -108,5 +107,4 @@ def load_pem(filename, type):
         data = pem_data.replace(header, "").replace(footer, "").strip()
         return base64.decodebytes(data.encode('utf-8'))
     except Exception as e:
-        print(f"Failed to load PEM file {filename}: {e}")
-        return None
+        return f"Failed to load PEM file {filename}: {e}"
