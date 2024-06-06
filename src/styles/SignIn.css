@@ -1,5 +1,5 @@
 .signin-form {
-  max-width: 300px;
+  max-width: 500px;
   margin: auto;
   padding: 20px;
   border: 1px solid #ccc;
@@ -8,26 +8,34 @@
   background-color: #fff;
 }
 
-.signin-label {
+.signin {
   display: block;
   font-weight: bold;
   position: relative;
   margin-bottom: 5px;
-  font-size: 13px;
+  font-size: 15px;
 }
 
-.input-username,
-.input-password {
+.input-signin-cccd,
+.input-signin-password {
   width: 100%;
   padding: 5px;
   margin-bottom: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 
-.input-username:focus,
-.input-password:focus {
+.input-signin-cccd:hover,
+.input-signin-password:hover {
+  border-color: orangered;
+}
+
+.input-signin-cccd:focus,
+.input-signin-password:focus {
   border-color: orangered;
   outline: none;
 }
@@ -49,9 +57,16 @@
 }
 
 .signin-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signin-submit input {
   width: 100%;
-  padding: 10px;
-  margin-top: 17px;
+  padding: 5px;
+  font-size: 20px;
+  margin-top: 15px;
   background-color: orangered;
   border: none;
   border-radius: 5px;
@@ -60,8 +75,8 @@
   cursor: pointer;
 }
 
-.signin-submit:hover {
-  background-color: #cc1f00;
+.signin-submit input:hover {
+  background-color: rgb(255, 98, 40);
 }
 
 .signup-link {

@@ -33,9 +33,9 @@ function SignUpForm() {
         <input
           type="text"
           name="CCCD"
-          placeholder="Nhập CCCD"
+          placeholder="Nhập căn cước công dân"
           onChange={handleChange}
-          className="input-cccd"
+          className="input-signup-cccd"
           required
         />
       </div>
@@ -63,7 +63,7 @@ function SignUpForm() {
           name="Address"
           placeholder="Nhập địa chỉ"
           onChange={handleChange}
-          className="input-address"
+          className="input-signup-address"
           required
         />
       </div>
@@ -111,7 +111,7 @@ function SignUpForm() {
           name="Password"
           placeholder="Nhập mật khẩu"
           onChange={handleChange}
-          className="input-password"
+          className="input-signup-password"
           required
         />
         <button
@@ -136,7 +136,7 @@ function SignUpForm() {
           name="confirmPassword"
           placeholder="Nhập lại mật khẩu"
           onChange={handleChange}
-          className="input-password"
+          className="input-signup-password"
           required
         />
         <button
@@ -154,9 +154,16 @@ function SignUpForm() {
 
       <div className="agreement">
         <input type="checkbox" required />
-        <span style={{ fontSize: "0.8em", marginTop: "3px", fontSize: "13px" }}>
-          Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và{" "}
-          <a href="#">Chính sách bảo mật</a> của Nhà Nước
+        <span>
+          Tôi đồng ý với{" "}
+          <a href="https://nplaw.vn/quy-dinh-cua-phap-luat-ve-bao-mat-thong-tin-ca-nhan.html">
+            Điều khoản sử dụng
+          </a>{" "}
+          và{" "}
+          <a href="https://nplaw.vn/quy-dinh-cua-phap-luat-ve-bao-mat-thong-tin-ca-nhan.html">
+            Chính sách bảo mật
+          </a>{" "}
+          của Nhà Nước
         </span>
       </div>
 

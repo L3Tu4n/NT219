@@ -17,10 +17,10 @@
   font-size: 15px;
 }
 
-.input-cccd,
+.input-signup-cccd,
 .input-first-and-last-name,
-.input-address,
-.input-password,
+.input-signup-address,
+.input-signup-password,
 .input-confirm-password {
   width: 100%;
   padding: 5px;
@@ -33,19 +33,19 @@
   cursor: pointer;
 }
 
-.input-cccd:focus,
+.input-signup-cccd:focus,
 .input-first-and-last-name:focus,
-.input-address:focus,
-.input-password:focus,
+.input-signup-address:focus,
+.input-signup-password:focus,
 .input-confirm-password:focus {
   border-color: orangered;
   outline: none;
 }
 
-.input-cccd:hover,
+.input-signup-cccd:hover,
 .input-first-and-last-name:hover,
-.input-address:hover,
-.input-password:hover,
+.input-signup-address:hover,
+.input-signup-password:hover,
 .input-confirm-password:hover {
   border-color: orangered;
 }
@@ -97,8 +97,9 @@
 }
 
 .signup-submit input {
-  width: 70%;
-  padding: 10px;
+  width: 100%;
+  padding: 5px;
+  font-size: 20px;
   background-color: orangered;
   border: none;
   border-radius: 5px;
@@ -114,13 +115,13 @@
 .agreement {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  justify-content: center;
+  margin-bottom: 15px;
+  font-size: 13px;
 }
 
 .agreement input {
-  transform: scale(1.25);
-  align-self: start;
-  margin: 6px 7px 0px 5px;
+  margin-right: 5px;
   accent-color: orangered;
 }
 .agreement a {
@@ -135,7 +136,7 @@
 
 .login-link {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .login-link a {
