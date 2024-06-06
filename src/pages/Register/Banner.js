@@ -14,7 +14,7 @@ function Banner({ page }) {
     <div className="register-banner">
       <span className="span-text">
         <Link className="logo-link" to="/">
-          TicketX88
+          Giấy đi chợ
         </Link>{" "}
         - {text}
       </span>
