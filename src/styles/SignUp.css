@@ -1,0 +1,155 @@
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.signup {
+  display: block;
+  font-weight: bold;
+  position: relative;
+  margin-bottom: 5px;
+  font-size: 15px;
+}
+
+.input-cccd,
+.input-first-and-last-name,
+.input-address,
+.input-password,
+.input-confirm-password {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.input-cccd:focus,
+.input-first-and-last-name:focus,
+.input-address:focus,
+.input-password:focus,
+.input-confirm-password:focus {
+  border-color: orangered;
+  outline: none;
+}
+
+.input-cccd:hover,
+.input-first-and-last-name:hover,
+.input-address:hover,
+.input-password:hover,
+.input-confirm-password:hover {
+  border-color: orangered;
+}
+
+.gender-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.custom-radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-radio-label {
+  position: relative;
+  padding-left: 3px;
+  cursor: pointer;
+}
+
+.password-container {
+  position: relative;
+  width: 100%;
+  font-weight: bold;
+  position: relative;
+  margin-bottom: 5px;
+  font-size: 15px;
+}
+
+.toggle-password {
+  position: absolute;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+  color: gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signup-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signup-submit input {
+  width: 70%;
+  padding: 10px;
+  background-color: orangered;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.signup-submit input:hover {
+  background-color: rgb(255, 98, 40);
+}
+
+.agreement {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.agreement input {
+  transform: scale(1.25);
+  align-self: start;
+  margin: 6px 7px 0px 5px;
+  accent-color: orangered;
+}
+.agreement a {
+  color: orangered;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.agreement a:hover {
+  text-decoration: underline;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.login-link a {
+  color: orangered;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
