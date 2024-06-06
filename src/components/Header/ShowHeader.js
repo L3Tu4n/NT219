@@ -53,7 +53,7 @@ const ShowHeader = () => {
       <div className="desktop" style={{ display: "flex" }}>
         <div className="logo">
           <Link className="logo-link" to="/">
-            TicketX88
+            Giấy đi chợ
           </Link>
         </div>
         <div className="options">
