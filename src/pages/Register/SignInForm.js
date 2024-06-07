@@ -1,35 +1,90 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import "../../styles/SignIn.css";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import { message } from "antd";
 
 function SignInForm() {
-  const [form, setForm] = useState({
-    UserName: "",
+  const [formDataSignIn, setFormDataSignIn] = useState({
+    CCCD: "",
     Password: "",
+  });
+
+  const [formErrorSignIn, setFormErrorSignIn] = useState({
+    CCCD: false,
+    Password: false,
   });
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  const handleChangeSingIn = (e) => {
+    let targetName, targetValue;
+
+    if (e && e.target) {
+      targetName = e.target.name;
+      targetValue = e.target.value;
+    } else {
+      targetValue = e;
+    }
+
+    setFormDataSignIn((prevFormData) => ({
+      ...prevFormData,
+      [targetName]: targetValue,
+    }));
+
+    setFormErrorSignIn((prevFormErrors) => ({
+      ...prevFormErrors,
+      [targetName]:
+        typeof targetValue === "string"
+          ? targetValue.trim() === ""
+          : !targetValue,
+    }));
   };
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  const [canShowMessage, setCanShowMessage] = useState(true);
 
-  const handleSubmit = (e) => {
+  const handleSubmitSignIn = (e) => {
     e.preventDefault();
-    const { CCCD, Password } = form;
-    if (CCCD === "079204123456" && Password === "admin") {
-      navigate("/Admin");
+
+    const newErrors = { ...formErrorSignIn };
+    let hasError = false;
+
+    for (const key in formDataSignIn) {
+      const value = formDataSignIn[key];
+      if (typeof value === "string") {
+        if (value.trim() === "") {
+          newErrors[key] = true;
+          hasError = true;
+        } else {
+          newErrors[key] = false;
+        }
+      } else {
+        if (!value) {
+          newErrors[key] = true;
+          hasError = true;
+        } else {
+          newErrors[key] = false;
+        }
+      }
+    }
+
+    setFormErrorSignIn(newErrors);
+
+    if (
+      hasError ||
+      Object.values(formDataSignIn).every((value) => value.trim() === "")
+    ) {
+      if (canShowMessage) {
+        setCanShowMessage(false);
+        message.error("Vui lòng nhập đầy đủ thông tin");
+        setTimeout(() => setCanShowMessage(true), 500);
+      }
     }
   };
 
   return (
-    <form className="signin-form" onSubmit={handleSubmit}>
+    <form className="signin-form">
       <div className="signin">
         <label>
           CCCD<span style={{ color: "red" }}>*</span>
@@ -38,13 +93,16 @@ function SignInForm() {
           type="text"
           name="CCCD"
           placeholder="Nhập căn cước công dân"
-          onChange={handleChange}
+          value={formDataSignIn.CCCD}
+          onChange={handleChangeSingIn}
           className="input-signin-cccd"
-          required
         />
+        <span className={`error-message ${formErrorSignIn.CCCD ? "show" : ""}`}>
+          Vui lòng nhập căn cước công dân
+        </span>
       </div>
 
-      <div className="password-container">
+      <div className="password-signin-container">
         <label>
           Mật khẩu<span style={{ color: "red" }}>*</span>
         </label>
@@ -52,29 +110,36 @@ function SignInForm() {
           type={showPassword ? "text" : "password"}
           name="Password"
           placeholder="Nhập mật khẩu"
-          onChange={handleChange}
+          value={formDataSignIn.Password}
+          onChange={handleChangeSingIn}
           className="input-signin-password"
-          required
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="toggle-password"
+          className="toggle-signin-password"
         >
           {showPassword ? (
             <EyeInvisibleOutlined />
           ) : (
-            <EyeTwoTone twoToneColor="orangered" />
+            <EyeTwoTone twoToneColor="rgb(78, 147, 178)" />
           )}
         </button>
+        <span
+          className={`error-message ${formErrorSignIn.Password ? "show" : ""}`}
+        >
+          Vui lòng nhập mật khẩu
+        </span>
       </div>
 
       <div className="signin-submit">
-        <input type="submit" value="Đăng nhập" />
+        <button type="submit" onClick={handleSubmitSignIn}>
+          Đăng nhập
+        </button>
       </div>
 
       <div className="signup-link">
-        Chưa có tài khoản?{" "}
+        <span>Chưa có tài khoản? </span>
         <a style={{ fontSize: 16 }} href="/SignUp">
           Đăng ký
         </a>

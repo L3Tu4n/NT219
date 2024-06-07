@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Container, Typography, Button, Box } from '@mui/material';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Container, Typography, Button, Box } from "@mui/material";
 import "../../styles/RorG.css";
 
 function RorG() {
@@ -15,7 +15,7 @@ function RorG() {
         <Button variant="contained" color="primary" component={Link} to="/yes">
           Đã có giấy đi chợ
         </Button>
-        
+
         <Button variant="contained" color="secondary" component={Link} to="/no">
           Chưa có giấy đi chợ
         </Button>

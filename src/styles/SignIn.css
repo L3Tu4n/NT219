@@ -1,54 +1,49 @@
 .signin-form {
   max-width: 500px;
-  margin: auto;
+  margin: 15px auto;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   background-color: #fff;
 }
 
-.signin {
+.signin,
+.password-signin-container {
   display: block;
   font-weight: bold;
   position: relative;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   font-size: 15px;
 }
 
 .input-signin-cccd,
 .input-signin-password {
   width: 100%;
-  padding: 5px;
+  padding: 5px 10px;
   margin-bottom: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  cursor: pointer;
+  justify-content: center;
 }
 
 .input-signin-cccd:hover,
 .input-signin-password:hover {
-  border-color: orangered;
+  border-color: rgb(78, 147, 178);
 }
 
 .input-signin-cccd:focus,
 .input-signin-password:focus {
-  border-color: orangered;
+  border-color: rgb(78, 147, 178);
   outline: none;
 }
 
-.password-container {
-  position: relative;
-}
-
-.toggle-password {
+.toggle-signin-password {
   position: absolute;
   right: 5px;
-  top: 65%;
-  transform: translateY(-51%);
+  top: 50%;
   background: none;
   border: none;
   cursor: pointer;
@@ -62,12 +57,12 @@
   justify-content: center;
 }
 
-.signin-submit input {
+.signin-submit button {
   width: 100%;
   padding: 5px;
   font-size: 20px;
   margin-top: 15px;
-  background-color: orangered;
+  background-color: rgb(78, 147, 178);
   border: none;
   border-radius: 5px;
   color: white;
@@ -75,8 +70,8 @@
   cursor: pointer;
 }
 
-.signin-submit input:hover {
-  background-color: rgb(255, 98, 40);
+.signin-submit button:hover {
+  background-color: rgb(109, 184, 219);
 }
 
 .signup-link {
@@ -85,7 +80,7 @@
 }
 
 .signup-link a {
-  color: orangered;
+  color: rgb(78, 147, 178);
   text-decoration: none;
 }
 

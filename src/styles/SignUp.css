@@ -1,19 +1,18 @@
 .signup-form {
-  display: flex;
-  flex-direction: column;
   max-width: 500px;
-  margin: auto;
+  margin: 15px auto 0 auto;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 10px;
   background-color: #fff;
 }
 
-.signup {
+.signup,
+.password-signup-container {
   display: block;
   font-weight: bold;
   position: relative;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   font-size: 15px;
 }
 
@@ -21,24 +20,26 @@
 .input-first-and-last-name,
 .input-signup-address,
 .input-signup-password,
-.input-confirm-password {
+.input-confirm-password,
+.form-control {
   width: 100%;
-  padding: 5px;
+  padding: 5px 10px;
   margin-bottom: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  cursor: pointer;
+  justify-content: center;
 }
 
 .input-signup-cccd:focus,
 .input-first-and-last-name:focus,
 .input-signup-address:focus,
 .input-signup-password:focus,
-.input-confirm-password:focus {
-  border-color: orangered;
+.input-confirm-password:focus,
+.form-control:focus {
+  border-color: rgb(78, 147, 178);
   outline: none;
 }
 
@@ -46,8 +47,9 @@
 .input-first-and-last-name:hover,
 .input-signup-address:hover,
 .input-signup-password:hover,
-.input-confirm-password:hover {
-  border-color: orangered;
+.input-confirm-password:hover,
+.form-control:hover {
+  border-color: rgb(78, 147, 178);
 }
 
 .gender-container {
@@ -69,25 +71,14 @@
   cursor: pointer;
 }
 
-.password-container {
-  position: relative;
-  width: 100%;
-  font-weight: bold;
-  position: relative;
-  margin-bottom: 5px;
-  font-size: 15px;
-}
-
-.toggle-password {
+.toggle-signup-password {
   position: absolute;
+  right: 5px;
+  top: 17%;
   background: none;
   border: none;
-  cursor: pointer;
   font-size: 1em;
   color: gray;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .signup-submit {
@@ -96,36 +87,32 @@
   justify-content: center;
 }
 
-.signup-submit input {
+.signup-submit button {
   width: 100%;
   padding: 5px;
   font-size: 20px;
-  background-color: orangered;
+  background-color: rgb(78, 147, 178);
   border: none;
   border-radius: 5px;
   color: white;
   font-weight: bold;
-  cursor: pointer;
 }
 
-.signup-submit input:hover {
-  background-color: rgb(255, 98, 40);
+.signup-submit button:hover {
+  background-color: rgb(109, 184, 219);
 }
 
 .agreement {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin-bottom: 15px;
   font-size: 13px;
 }
 
 .agreement input {
   margin-right: 5px;
-  accent-color: orangered;
+  accent-color: rgb(78, 147, 178);
 }
 .agreement a {
-  color: orangered;
+  color: rgb(78, 147, 178);
   text-decoration: none;
   font-size: 13px;
 }
@@ -140,7 +127,7 @@
 }
 
 .login-link a {
-  color: orangered;
+  color: rgb(78, 147, 178);
   text-decoration: none;
   font-size: 16px;
 }
@@ -150,7 +137,12 @@
 }
 
 .error-message {
+  display: none;
+}
+
+.error-message.show {
+  display: block;
   color: red;
-  font-size: 12px;
-  margin-top: 5px;
+  font-weight: normal;
+  font-size: 13px;
 }

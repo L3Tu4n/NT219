@@ -23,8 +23,8 @@
 .announcement h2,
 .instructions h2,
 .contact h2 {
-  color: orangered;
-  border-bottom: 2px solid orangered;
+  color: rgb(78, 147, 178);
+  border-bottom: 2px solid rgb(78, 147, 178);
   padding-bottom: 10px;
 }
 

@@ -4,7 +4,7 @@ import "../../styles/ShowHome.css";
 const ShowHome = () => {
   return (
     <div className="home-container">
-      <h1>Chào mừng đến với trang đăng ký giấy đi chợ</h1>
+      <h1>Trang đăng ký giấy đi chợ</h1>
 
       <div className="announcement">
         <h2>Thông báo mới nhất</h2>
