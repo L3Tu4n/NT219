@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../styles/SignIn.css";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
@@ -17,8 +18,18 @@ function SignInForm() {
     });
   };
 
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const { CCCD, Password } = form;
+    if (CCCD === "079204123456" && Password === "admin") {
+      navigate("/Admin");
+    }
+  };
+
   return (
-    <form className="signin-form">
+    <form className="signin-form" onSubmit={handleSubmit}>
       <div className="signin">
         <label>
           CCCD<span style={{ color: "red" }}>*</span>

@@ -22,30 +22,13 @@ const ShowHeader = () => {
     if (isLoggedIn) {
       dispatch(logIn(username));
     }
-  }, []);
-
-  const handleLogOut = () => {
-    handleNormalLogOut();
-  };
+  }, [dispatch]);
 
   const handleNormalLogOut = () => {
     dispatch(logOut());
     localStorage.setItem("isLoggedIn", "false");
     localStorage.removeItem("username");
     navigate("/");
-  };
-
-  useEffect(() => {
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-    };
-  });
-
-  const [isMobile, setIsMobile] = useState(false);
-  const checkMobile = () => {
-    setIsMobile(window.innerWidth <= 768);
   };
 
   return (
@@ -72,7 +55,7 @@ const ShowHeader = () => {
                       dropdownVisible ? "show" : ""
                     }`}
                   >
-                    <button onClick={handleLogOut}>Đăng xuất</button>
+                    <button onClick={handleNormalLogOut}>Đăng xuất</button>
                   </div>
                 )}
               </div>

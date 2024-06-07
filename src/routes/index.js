@@ -2,6 +2,7 @@ import SignUp from "../pages/Register/SignUp.jsx";
 import SignIn from "../pages/Register/SignIn.jsx";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import Home from "../pages/Home/Home.jsx";
+import Admin from "../pages/Admin/Admin.jsx";
 
 export const routes = [
   {
@@ -18,6 +19,11 @@ export const routes = [
     path: "/SignIn",
     page: SignIn,
     isShowHeader: false,
+  },
+  {
+    path: "/Admin",
+    page: Admin,
+    isShowHeader: true,
   },
   {
     path: "*",
