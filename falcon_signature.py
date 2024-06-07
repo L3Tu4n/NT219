@@ -34,7 +34,7 @@ class FalconSignature:
             with open(pdf_path, 'rb') as f:
                 pdf_data = f.read()
 
-            additional_info = f"{user_info['cccd']}{user_info['name']}{chingsphu_info['CP_username']}{chingsphu_info['sign_place']}".encode('utf-8')
+            additional_info = f"{user_info['cccd']}{user_info['name']}{chingsphu_info['CP_username']}{chingsphu_info['sign_place']}{road_info['start_place']}{road_info['destination_place']}".encode('utf-8')
             pdf_data += additional_info
 
             sk_data = load_pem(SECRET_KEY_FILE, "FALCON PRIVATE KEY")
@@ -65,11 +65,11 @@ class FalconSignature:
             )
             await create_gdc(new_gdc)
             
-            return "PDF signed and signature saved successfully."
+            return "PDF signed and signature saved successfully.", gdc_Id
         except Exception as e:
-            return f"Failed to sign PDF: {e}"
+            return f"Failed to sign PDF: {e}", None
 
-    async def verify_pdf(self, gdc_id, pdf_path, user_info, chingsphu_info):
+    async def verify_pdf(self, gdc_id, pdf_path, user_info, chingsphu_info, road_info):
         try:
             gdc = gdc_collection.find_one({"gdc_Id": gdc_id})
             if not gdc:
@@ -78,7 +78,7 @@ class FalconSignature:
             with open(pdf_path, 'rb') as f:
                 pdf_data = f.read()
 
-            additional_info = f"{user_info['cccd']}{user_info['name']}{chingsphu_info['name']}{chingsphu_info['sign_place']}".encode('utf-8')
+            additional_info = f"{user_info['cccd']}{user_info['name']}{chingsphu_info['CP_username']}{chingsphu_info['sign_place']}{road_info['start_place']}{road_info['destination_place']}".encode('utf-8')
             pdf_data += additional_info
 
             pk_data = load_pem(PUBLIC_KEY_FILE, "FALCON PUBLIC KEY")
