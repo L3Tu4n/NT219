@@ -140,9 +140,7 @@ function SignInForm() {
 
       <div className="signup-link">
         <span>Chưa có tài khoản? </span>
-        <a style={{ fontSize: 16 }} href="/SignUp">
-          Đăng ký
-        </a>
+        <a href="/SignUp">Đăng ký</a>
       </div>
     </form>
   );

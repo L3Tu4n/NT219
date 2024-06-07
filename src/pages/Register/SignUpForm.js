@@ -306,7 +306,8 @@ function SignUpForm() {
       </div>
 
       <div className="login-link">
-        Đã có tài khoản? <a href="/SignIn">Đăng nhập</a>
+        <span>Đã có tài khoản? </span>
+        <a href="/SignIn">Đăng nhập</a>
       </div>
     </form>
   );
