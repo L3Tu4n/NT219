@@ -1,27 +1,49 @@
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from falcon_signature import FalconSignature
-from passlib.context import CryptContext
-from models import User, GDC, ChingsPhu
+from pydantic import BaseModel
+from models import User, ChingsPhu
 from database import user_collection, gdc_collection, chingsphu_collection
-from database_collections import create_user, create_gdc, create_chingsphu
+from database_collections import create_user, create_chingsphu
 import tempfile
 import shutil
 import os
+from auth import create_access_token, decode_access_token, verify_password, hash_password
 
 app = FastAPI()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def hash_password(password):
-    return pwd_context.hash(password)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@app.post("/users/")
-async def create_user_endpoint(user: User):
+class LoginForm(BaseModel):
+    username: str
+    password: str
+
+@app.post("/signup/")
+async def signup(user: User):
+    user.password = hash_password(user.password)
     return await create_user(user)
 
-@app.post("/gdc/")
-async def create_gdc_endpoint(gdc: GDC):
-    return await create_gdc(gdc)
+@app.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await user_collection.find_one({"cccd": form_data.username})
+    if user and verify_password(form_data.password, user["password"]):
+        access_token = create_access_token(data={"sub": form_data.username, "type": "user"})
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    chingsphu = await chingsphu_collection.find_one({"CP_username": form_data.username})
+    if chingsphu and verify_password(form_data.password, chingsphu["password"]):
+        access_token = create_access_token(data={"sub": form_data.username, "type": "chingsphu"})
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    raise HTTPException(status_code=400, detail="Invalid username or password")
+
+@app.get("/users/me")
+async def read_users_me(token: str = Depends(oauth2_scheme)):
+    username = decode_access_token(token)
+    if username is None:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+    return {"username": username}
 
 @app.post("/chingsphu/")
 async def create_chingsphu_endpoint(chingsphu: ChingsPhu):
@@ -37,8 +59,12 @@ async def keygen():
         return JSONResponse(status_code=200, content={"Status": "Error", "Message": str(e)})
 
 @app.post("/sign")
-async def sign(file: UploadFile = File(...), cccd: str = Form(...), CP_username: str = Form(...), start_place: str = Form(...), destination_place: str = Form(...)):
+async def sign(file: UploadFile = File(...), cccd: str = Form(...), CP_username: str = Form(...), start_place: str = Form(...), destination_place: str = Form(...), token: str = Depends(oauth2_scheme)):
     try:
+        user_info = decode_access_token(token)
+        if user_info is None or user_info["type"] != "chingsphu":
+            raise HTTPException(status_code=401, detail="Not authorized")
+        
         user = await user_collection.find_one({"_id": cccd})
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -77,10 +103,13 @@ async def sign(file: UploadFile = File(...), cccd: str = Form(...), CP_username:
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
-            
 @app.post("/verify")
-async def verify(file: UploadFile = File(...), gdc_id: str = Form(...)):
+async def verify(file: UploadFile = File(...), gdc_id: str = Form(...), token: str = Depends(oauth2_scheme)):
     try:
+        user_info = decode_access_token(token)
+        if user_info is None or user_info["type"] != "chingsphu":
+            raise HTTPException(status_code=401, detail="Not authorized")
+        
         gdc = await gdc_collection.find_one({"_id": gdc_id})
         if not gdc:
             raise HTTPException(status_code=404, detail="GDC not found")
