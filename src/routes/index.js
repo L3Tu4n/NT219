@@ -2,6 +2,9 @@ import SignUp from "../pages/Register/SignUp.jsx";
 import SignIn from "../pages/Register/SignIn.jsx";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import Home from "../pages/Home/Home.jsx";
+import RorG from "../pages/RorG/RorG.jsx"
+import Request from "../pages/RorG/no.jsx";
+import Get from "../pages/RorG/yes.jsx";
 
 export const routes = [
   {
@@ -23,4 +26,17 @@ export const routes = [
     path: "*",
     page: NotFoundPage,
   },
+  {
+    path: "/RorG",
+    page: RorG,
+    isShowHeader: false,
+  },
+  {
+    path: "/no",
+    page: Request,
+  },
+  {
+    path: "/yes",
+    page: Get,
+  }
 ];
