@@ -32,9 +32,5 @@ async def create_gdc(gdc: GDC):
     if not await chingsphu_collection.find_one({"_id": gdc_dict["CP_username"]}):
         raise HTTPException(status_code=404, detail="Chingsphu not found")
     
-    if user["hadGdc"]:
-        raise HTTPException(status_code=400, detail="User already has a GDC")
-
-    await user_collection.update_one({"_id": gdc_dict["cccd"]}, {"$set": {"hadGdc": True}})
     result = await gdc_collection.insert_one(gdc_dict)
     return {"_id": str(result.inserted_id)}

@@ -25,7 +25,7 @@ class LoginForm(BaseModel):
 
 @app.post("/signup/")
 async def signup(user: User):
-    existing_user = await user_collection.find_one(user.username)
+    existing_user = await user_collection.find_one(user.cccd)
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already in use")
     user.password = hash_password(user.password)
@@ -66,7 +66,7 @@ async def keygen():
         return JSONResponse(status_code=400, content={"Status": "Error", "Message": str(e)})
 
 @app.post("/sign")
-async def sign(file: UploadFile = File(...), cccd: str = Form(...), CP_username: str = Form(...), start_place: str = Form(...), destination_place: str = Form(...), token: str = Depends(oauth2_scheme)):
+async def sign(cccd: str = Form(...), CP_username: str = Form(...), start_place: str = Form(...), destination_place: str = Form(...), token: str = Depends(oauth2_scheme)):
     try:
         user_access = decode_access_token(token)
         if user_access is None or user_access["type"] != "chingsphu":
@@ -95,15 +95,13 @@ async def sign(file: UploadFile = File(...), cccd: str = Form(...), CP_username:
             "destination_place": destination_place,
         }
 
-        with tempfile.NamedTemporaryFile(delete=False) as temp:
-            shutil.copyfileobj(file.file, temp)
-            temp_path = temp.name
+        temp_path = "template/input.pdf"
 
         falcon = FalconSignature()
         message, gdc_id = await falcon.sign_pdf(temp_path, user_info, chingsphu_info, road_info)
         
         if gdc_id is None:
-            raise Exception("Failed to sign PDF and save signature to GDC")
+            raise Exception("Failed to sign PDF and save signature to GDC", message)
         
         # Generate QR Code with verification link
         verification_url = f"http://localhost:8000/verify/{gdc_id}"
@@ -128,11 +126,10 @@ async def sign(file: UploadFile = File(...), cccd: str = Form(...), CP_username:
         qr_pdf_reader = PdfReader(qr_pdf_path)
         pdf_writer.add_page(qr_pdf_reader.pages[0])
 
-        signed_pdf_path = f"{gdc_id}.pdf"
+        signed_pdf_path = f"signed_pdf/{gdc_id}.pdf"
         with open(signed_pdf_path, "wb") as f_out:
             pdf_writer.write(f_out)
 
-        os.remove(temp_path)
         os.remove(qr_path)
         os.remove(qr_pdf_path)
 
@@ -141,7 +138,7 @@ async def sign(file: UploadFile = File(...), cccd: str = Form(...), CP_username:
         return JSONResponse(status_code=e.status_code, content={"Status": "Error", "Message": e.detail})
     except Exception as e:
         return JSONResponse(status_code=500, content={"Status": "Error", "Message": str(e)})
-
+    
 @app.post("/verify/{gdc_id}")
 async def verify(gdc_id: str):
     try:

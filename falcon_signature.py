@@ -56,7 +56,6 @@ class FalconSignature:
                 gdc_Id=gdc_Id,
                 cccd=user_info['cccd'],
                 CP_username=chingsphu_info['CP_username'],
-                isVerified=False,
                 sign_date=datetime.now().isoformat(),
                 sign_place=chingsphu_info['sign_place'],
                 start_place=road_info['start_place'],
