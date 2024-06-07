@@ -1,14 +1,15 @@
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Depends
+from fastapi import FastAPI, Form, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from falcon_signature import FalconSignature
 from pydantic import BaseModel
 from models import User, ChingsPhu
 from database import user_collection, gdc_collection, chingsphu_collection
 from database_collections import create_user, create_chingsphu
-import tempfile
-import shutil
 import os
+import random
+import string
+from datetime import datetime
 from auth import create_access_token, decode_access_token, verify_password, hash_password
 import qrcode
 from PyPDF2 import PdfReader, PdfWriter
@@ -22,6 +23,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 class LoginForm(BaseModel):
     username: str
     password: str
+    
+class SignModel(BaseModel):
+    gdc_Id: str
+    CP_username: str
+
+class RequestSignModel(BaseModel):
+    cccd: str
+    start_place: str
+    destination_place: str
 
 @app.post("/signup/")
 async def signup(user: User):
@@ -32,15 +42,15 @@ async def signup(user: User):
     return await create_user(user)
 
 @app.post("/token")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await user_collection.find_one({"cccd": form_data.username})
-    if user and verify_password(form_data.password, user["password"]):
-        access_token = create_access_token(data={"sub": form_data.username, "type": "user"})
+async def login(user: LoginForm):
+    user_db = await user_collection.find_one({"cccd": user.username})
+    if user_db and verify_password(user.password, user_db["password"]):
+        access_token = create_access_token(data={"sub": user.username, "type": "user"})
         return {"access_token": access_token, "token_type": "bearer"}
 
-    chingsphu = await chingsphu_collection.find_one({"CP_username": form_data.username})
-    if chingsphu and verify_password(form_data.password, chingsphu["password"]):
-        access_token = create_access_token(data={"sub": form_data.username, "type": "chingsphu"})
+    chingsphu = await chingsphu_collection.find_one({"CP_username": user.username})
+    if chingsphu and verify_password(user.password, chingsphu["password"]):
+        access_token = create_access_token(data={"sub": user.username, "type": "chingsphu"})
         return {"access_token": access_token, "token_type": "bearer"}
 
     raise HTTPException(status_code=400, detail="Invalid username or password")
@@ -57,8 +67,12 @@ async def create_chingsphu_endpoint(chingsphu: ChingsPhu):
     return await create_chingsphu(chingsphu)
 
 @app.get("/keygen")
-async def keygen():
+async def keygen(token: str = Depends(oauth2_scheme)):
     try:
+        user_access = decode_access_token(token)
+        if user_access is None or user_access["type"] != "chingsphu":
+            raise HTTPException(status_code=401, detail="Not authorized")
+        
         falcon = FalconSignature()
         falcon.generate_keys()
         return JSONResponse(status_code=200, content={"Status": "Success", "Message": "Keys generated successfully!"})
@@ -66,23 +80,26 @@ async def keygen():
         return JSONResponse(status_code=400, content={"Status": "Error", "Message": str(e)})
 
 @app.post("/sign")
-async def sign(cccd: str = Form(...), CP_username: str = Form(...), start_place: str = Form(...), destination_place: str = Form(...), token: str = Depends(oauth2_scheme)):
+async def sign(sign_data: SignModel, token: str = Depends(oauth2_scheme)):
     try:
         user_access = decode_access_token(token)
         if user_access is None or user_access["type"] != "chingsphu":
             raise HTTPException(status_code=401, detail="Not authorized")
         
-        user = await user_collection.find_one({"_id": cccd})
+        gdc = await gdc_collection.find_one({"gdc_Id": sign_data.gdc_Id})
+        if not gdc:
+            raise HTTPException(status_code=404, detail="GDC not found")
+
+        user = await user_collection.find_one({"cccd": gdc["cccd"]})
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-
-        chingsphu = await chingsphu_collection.find_one({"_id": CP_username})
+        
+        chingsphu = await chingsphu_collection.find_one({"_id": sign_data.CP_username})
         if not chingsphu:
             raise HTTPException(status_code=404, detail="Chingsphu not found")
 
         user_info = {
             "cccd": user["cccd"],
-            "name": user["name"],
         }
 
         chingsphu_info = {
@@ -91,18 +108,27 @@ async def sign(cccd: str = Form(...), CP_username: str = Form(...), start_place:
         }
         
         road_info = {
-            "start_place": start_place,
-            "destination_place": destination_place,
+            "start_place": gdc["start_place"],
+            "destination_place": gdc["destination_place"],
         }
 
-        temp_path = "template/input.pdf"
+        temp_path = "template/gdc.pdf"
 
         falcon = FalconSignature()
-        message, gdc_id = await falcon.sign_pdf(temp_path, user_info, chingsphu_info, road_info)
+        message, gdc_id, signature = await falcon.sign_pdf(temp_path, user_info, chingsphu_info, road_info, sign_data.gdc_Id)
         
         if gdc_id is None:
             raise Exception("Failed to sign PDF and save signature to GDC", message)
         
+        update_data = {
+            "CP_username": chingsphu["CP_username"],
+            "sign_place": chingsphu["sign_place"],
+            "sign_date": datetime.now().isoformat(),
+            "signature": signature
+        }
+                
+        await gdc_collection.update_one({"gdc_Id": sign_data.gdc_Id}, {"$set": update_data})
+
         # Generate QR Code with verification link
         verification_url = f"http://localhost:8000/verify/{gdc_id}"
         qr = qrcode.make(verification_url)
@@ -138,7 +164,7 @@ async def sign(cccd: str = Form(...), CP_username: str = Form(...), start_place:
         return JSONResponse(status_code=e.status_code, content={"Status": "Error", "Message": e.detail})
     except Exception as e:
         return JSONResponse(status_code=500, content={"Status": "Error", "Message": str(e)})
-    
+
 @app.post("/verify/{gdc_id}")
 async def verify(gdc_id: str):
     try:
@@ -156,7 +182,6 @@ async def verify(gdc_id: str):
 
         user_info = {
             "cccd": user["cccd"],
-            "name": user["name"],
         }
 
         chingsphu_info = {
@@ -181,3 +206,38 @@ async def verify(gdc_id: str):
         return JSONResponse(status_code=e.status_code, content={"Status": "Error", "Message": e.detail})
     except Exception as e:
         return JSONResponse(status_code=500, content={"Status": "Error", "Message": str(e)})
+    
+@app.post("/request_sign")
+async def request_sign(request: RequestSignModel, token: str = Depends(oauth2_scheme)):
+    user_access = decode_access_token(token)
+    if user_access is None:
+        raise HTTPException(status_code=401, detail="Not authorized")
+    
+    user = await user_collection.find_one({"_id": request.cccd})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    gdc_Id = ''.join(random.choices(string.digits, k=6))
+    while await gdc_collection.find_one({"gdc_Id": gdc_Id}):
+        gdc_Id = ''.join(random.choices(string.digits, k=6))
+
+    gdc = {
+        "_id": gdc_Id,
+        "gdc_Id": gdc_Id,
+        "cccd": request.cccd,
+        "start_place": request.start_place,
+        "destination_place": request.destination_place,
+    }
+    await gdc_collection.insert_one(gdc)
+
+    return {"gdc_Id": gdc_Id}
+
+@app.get("/download_signed/{gdc_id}")
+async def download_signed(gdc_id: str):
+    gdc = await gdc_collection.find_one({"gdc_Id": gdc_id})
+
+    if not gdc or "signature" not in gdc:
+        raise HTTPException(status_code=404, detail="GDC not found or not signed yet")
+
+    signed_pdf_path = f"signed_pdf/{gdc_id}.pdf"
+    return FileResponse(signed_pdf_path, filename="signed_GDC.pdf")

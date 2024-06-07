@@ -1,12 +1,7 @@
 import base64
 import pickle
 import sys
-import random
-import string
-from database_collections import create_gdc
-from datetime import datetime
 from database import gdc_collection
-from models import GDC
 from Crypto.Hash import SHAKE256
 
 sys.path.append('/falcon')
@@ -29,17 +24,17 @@ class FalconSignature:
         save_pem(SECRET_KEY_FILE, self.sk.to_bytes(), "FALCON PRIVATE KEY")
         save_pem(PUBLIC_KEY_FILE, self.pk.to_bytes(), "FALCON PUBLIC KEY")
 
-    async def sign_pdf(self, pdf_path, user_info, chingsphu_info, road_info):
+    async def sign_pdf(self, pdf_path, user_info, chingsphu_info, road_info, gdc_Id):
         try:
             with open(pdf_path, 'rb') as f:
                 pdf_data = f.read()
 
-            additional_info = f"{user_info['cccd']}{user_info['name']}{chingsphu_info['CP_username']}{chingsphu_info['sign_place']}{road_info['start_place']}{road_info['destination_place']}".encode('utf-8')
+            additional_info = f"{user_info['cccd']}{chingsphu_info['CP_username']}{chingsphu_info['sign_place']}{road_info['start_place']}{road_info['destination_place']}".encode('utf-8')
             pdf_data += additional_info
 
             sk_data = load_pem(SECRET_KEY_FILE, "FALCON PRIVATE KEY")
             if sk_data is None:
-                return "Secret key not found"
+                return "Secret key not found", None
             sk = SerializableSecretKey.from_bytes(sk_data)
 
             hash_func = SHAKE256.new()
@@ -47,26 +42,10 @@ class FalconSignature:
             hash_value = hash_func.read(64)
 
             signature = sk.sign(hash_value)
-
-            gdc_Id = ''.join(random.choices(string.digits, k=6))
-            while await gdc_collection.find_one({"_id": gdc_Id}):
-                gdc_Id = ''.join(random.choices(string.digits, k=6))
             
-            new_gdc = GDC(
-                gdc_Id=gdc_Id,
-                cccd=user_info['cccd'],
-                CP_username=chingsphu_info['CP_username'],
-                sign_date=datetime.now().isoformat(),
-                sign_place=chingsphu_info['sign_place'],
-                start_place=road_info['start_place'],
-                destination_place=road_info['destination_place'],
-                signature=base64.encodebytes(signature).decode('utf-8')
-            )
-            await create_gdc(new_gdc)
-            
-            return "PDF signed and signature saved successfully.", gdc_Id
+            return "PDF signed and signature saved successfully.", gdc_Id, signature
         except Exception as e:
-            return f"Failed to sign PDF: {e}", None
+            return f"Failed to sign PDF: {e}", None, None
 
     async def verify_pdf(self, gdc_id, pdf_path, user_info, chingsphu_info, road_info):
         try:
@@ -77,7 +56,7 @@ class FalconSignature:
             with open(pdf_path, 'rb') as f:
                 pdf_data = f.read()
 
-            additional_info = f"{user_info['cccd']}{user_info['name']}{chingsphu_info['CP_username']}{chingsphu_info['sign_place']}{road_info['start_place']}{road_info['destination_place']}".encode('utf-8')
+            additional_info = f"{user_info['cccd']}{chingsphu_info['CP_username']}{chingsphu_info['sign_place']}{road_info['start_place']}{road_info['destination_place']}".encode('utf-8')
             pdf_data += additional_info
 
             pk_data = load_pem(PUBLIC_KEY_FILE, "FALCON PUBLIC KEY")
