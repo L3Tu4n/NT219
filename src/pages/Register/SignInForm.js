@@ -106,25 +106,27 @@ function SignInForm() {
         <label>
           Mật khẩu<span style={{ color: "red" }}>*</span>
         </label>
-        <input
-          type={showPassword ? "text" : "password"}
-          name="Password"
-          placeholder="Nhập mật khẩu"
-          value={formDataSignIn.Password}
-          onChange={handleChangeSingIn}
-          className="input-signin-password"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="toggle-signin-password"
-        >
-          {showPassword ? (
-            <EyeInvisibleOutlined />
-          ) : (
-            <EyeTwoTone twoToneColor="rgb(78, 147, 178)" />
-          )}
-        </button>
+        <div style={{ position: "relative" }}>
+          <input
+            type={showPassword ? "text" : "password"}
+            name="Password"
+            placeholder="Nhập mật khẩu"
+            value={formDataSignIn.Password}
+            onChange={handleChangeSingIn}
+            className="input-signin-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="toggle-signin-password"
+          >
+            {showPassword ? (
+              <EyeInvisibleOutlined />
+            ) : (
+              <EyeTwoTone twoToneColor="rgb(78, 147, 178)" />
+            )}
+          </button>
+        </div>
         <span
           className={`error-message ${formErrorSignIn.Password ? "show" : ""}`}
         >

@@ -43,10 +43,9 @@
 .toggle-signin-password {
   position: absolute;
   right: 5px;
-  top: 50%;
+  top: 17%;
   background: none;
   border: none;
-  cursor: pointer;
   font-size: 1em;
   color: gray;
 }
