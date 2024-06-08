@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Form, HTTPException, Depends
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import JSONResponse, FileResponse
 from falcon_signature import FalconSignature
 from pydantic import BaseModel
@@ -11,10 +11,7 @@ import random
 import string
 from datetime import datetime
 from auth import create_access_token, decode_access_token, verify_password, hash_password
-import qrcode
-from PyPDF2 import PdfReader, PdfWriter
-from PIL import Image
-import img2pdf
+from QR_and_Text import generate_qr_code, insert_qr_to_pdf, create_watermark, add_watermark
 
 app = FastAPI()
 
@@ -38,7 +35,6 @@ async def signup(user: User):
     existing_user = await user_collection.find_one(user.cccd)
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already in use")
-    user.password = hash_password(user.password)
     return await create_user(user)
 
 @app.post("/token")
@@ -129,35 +125,23 @@ async def sign(sign_data: SignModel, token: str = Depends(oauth2_scheme)):
                 
         await gdc_collection.update_one({"gdc_Id": sign_data.gdc_Id}, {"$set": update_data})
 
-        # Generate QR Code with verification link
         verification_url = f"http://localhost:8000/verify/{gdc_id}"
-        qr = qrcode.make(verification_url)
-        qr_path = f"{temp_path}.png"
-        qr.save(qr_path)
+        qr_code_path = "qr_code.png"
+        generate_qr_code(verification_url, qr_code_path)
 
-        # Convert QR code PNG to PDF
-        qr_pdf_path = f"{temp_path}_qr.pdf"
-        with Image.open(qr_path) as img:
-            conv = img2pdf.convert(img.filename)
-            with open(qr_pdf_path, "wb") as file:
-                file.write(conv)
+        qr_inserted_pdf_path = f"signed_pdf/{gdc_id}_qr.pdf"
+        insert_qr_to_pdf(temp_path, qr_code_path, qr_inserted_pdf_path)
+        os.remove(qr_code_path)
 
-        # Insert QR Code into PDF
-        pdf_writer = PdfWriter()
-        pdf_reader = PdfReader(temp_path)
-
-        for page in pdf_reader.pages:
-            pdf_writer.add_page(page)
-
-        qr_pdf_reader = PdfReader(qr_pdf_path)
-        pdf_writer.add_page(qr_pdf_reader.pages[0])
+        font_path = "Sitka Banner.ttf"
+        watermark_pdf_path = "watermark.pdf"
+        create_watermark(user, gdc, font_path, watermark_pdf_path)
 
         signed_pdf_path = f"signed_pdf/{gdc_id}.pdf"
-        with open(signed_pdf_path, "wb") as f_out:
-            pdf_writer.write(f_out)
+        add_watermark(qr_inserted_pdf_path, watermark_pdf_path, signed_pdf_path)
 
-        os.remove(qr_path)
-        os.remove(qr_pdf_path)
+        os.remove(watermark_pdf_path)
+        os.remove(qr_inserted_pdf_path)
 
         return JSONResponse(status_code=200, content={"Status": "Success", "Message": message, "Signed PDF Path": signed_pdf_path})
     except HTTPException as e:

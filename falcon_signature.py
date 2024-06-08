@@ -41,7 +41,8 @@ class FalconSignature:
             hash_func.update(pdf_data)
             hash_value = hash_func.read(64)
 
-            signature = sk.sign(hash_value)
+            raw_signature = sk.sign(hash_value)
+            signature = base64.encodebytes(raw_signature).decode('utf-8')
             
             return "PDF signed and signature saved successfully.", gdc_Id, signature
         except Exception as e:
