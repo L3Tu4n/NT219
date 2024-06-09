@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../../styles/SignIn.css";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { message } from "antd";
@@ -16,7 +16,7 @@ function SignInForm() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-
+  const navigate = useNavigate();
   const handleChangeSingIn = (e) => {
     let targetName, targetValue;
 
@@ -80,6 +80,42 @@ function SignInForm() {
         message.error("Vui lòng nhập đầy đủ thông tin");
         setTimeout(() => setCanShowMessage(true), 500);
       }
+    } else {
+      fetch("http://localhost:8000/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formDataSignIn.CCCD,
+          password: formDataSignIn.Password,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.access_token) {
+            localStorage.setItem("access_token", data.access_token);
+            fetch("http://localhost:8000/users/me", {
+              headers: {
+                Authorization: `Bearer ${data.access_token}`,
+              },
+            })
+              .then((response) => response.json())
+              .then((userData) => {
+                localStorage.setItem("cccd", userData.cccd);
+                if (userData.user_type === "chingsphu") {
+                  navigate("/Admin");
+                } else {
+                  navigate("/Request");
+                }
+              });
+          } else {
+            message.error("Invalid username or password");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
     }
   };
 

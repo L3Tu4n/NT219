@@ -65,3 +65,7 @@
   text-decoration: none;
   display: block;
 }
+
+.user-dropdown-content:hover {
+  background-color: #2b2b2b;
+}

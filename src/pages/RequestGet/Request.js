@@ -1,49 +1,87 @@
-import React, { useState } from 'react';
-import { Table, Button, Tag, Typography, Modal, Input } from 'antd';
-import { DownloadOutlined } from '@ant-design/icons';
-import '../../styles/request.css';
+import React, { useEffect, useState } from "react";
+import { Table, Button, Tag, Typography, Modal, Input, message } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
+import "../../styles/Request.css";
 
 const Request = () => {
   const [data, setData] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+
+  useEffect(() => {
+    const loadGdc = async () => {
+      const cccd = localStorage.getItem("cccd");
+      const response = await fetch(`http://localhost:8000/load_gdc/${cccd}`);
+      const gdcList = await response.json();
+
+      if (!Array.isArray(gdcList)) {
+        console.error("gdcList is not an array:", gdcList);
+        return;
+      }
+
+      const newData = gdcList.map((gdc, index) => ({
+        key: (index + 1).toString(),
+        marketPassId: gdc.gdc_Id,
+        idNumber: gdc.cccd,
+        from: gdc.start_place,
+        to: gdc.destination_place,
+        status: gdc.signature ? "Đã ký" : "Chưa ký",
+      }));
+
+      setData(newData);
+    };
+
+    loadGdc();
+  }, []);
 
   const handleDownload = (record) => {
-    if (record.status === "Đã ký") {
-      const filename = `market_pass_${record.key}.txt`;
-      const content = `Market Pass ID: ${record.marketPassId}\nID Number: ${record.idNumber}\nFrom: ${record.from}\nTo: ${record.to}\nStatus: ${record.status}`;
-  
-      const element = document.createElement('a');
-      const file = new Blob([content], {type: 'text/plain'});
-      element.href = URL.createObjectURL(file);
-      element.download = filename;
-      document.body.appendChild(element);
-      element.click();
-    } else {
-      alert("Chỉ giấy đã ký mới có thể tải xuống");
-    }
+    window.location.href = `http://localhost:8000/download_signed/${record.marketPassId}`;
   };
 
   const showModal = () => {
     setIsModalVisible(true);
   };
 
-  const handleOk = () => {
+  const handleOk = async () => {
+    if (!from || !to) {
+      message.error("Vui lòng nhập đủ thông tin.");
+      return;
+    }
+
+    const cccd = localStorage.getItem("cccd");
+    const response = await fetch("http://localhost:8000/request_sign", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
+      body: JSON.stringify({
+        cccd,
+        start_place: from,
+        destination_place: to,
+      }),
+    });
+
+    const gdc = await response.json();
     const newData = {
       key: (data.length + 1).toString(),
-      marketPassId: `MP00${data.length + 1}`,
-      idNumber: "123456789",
-      from,
-      to,
-      status: "Chưa ký",
+      marketPassId: gdc.gdc_Id,
+      idNumber: gdc.cccd,
+      from: gdc.start_place,
+      to: gdc.destination_place,
+      status: gdc.signature ? "Đã ký" : "Chưa ký",
     };
 
     setData([...data, newData]);
+    setFrom("");
+    setTo("");
     setIsModalVisible(false);
   };
 
   const handleCancel = () => {
+    setFrom("");
+    setTo("");
     setIsModalVisible(false);
   };
 
@@ -89,7 +127,7 @@ const Request = () => {
         <Button
           className="styled-button"
           onClick={() => handleDownload(record)}
-          disabled={record.status === "Đã ký"}
+          disabled={record.status === "Chưa ký"}
           icon={<DownloadOutlined />}
         >
           Tải xuống
@@ -105,22 +143,30 @@ const Request = () => {
         dataSource={data}
         pagination={{ pageSize: 7 }}
         rowClassName={(record) =>
-          record.status === "Đã ký" ? "signed-row" : ""
+          record.status === "Đã ký" ? "pass-signed-row" : "pass-unsigned-row"
         }
         locale={{ emptyText: <Typography>No data</Typography> }}
       />
       <div className="request-button-container">
-        <Button
-          type="primary"
-          onClick={showModal}
-        >
+        <Button type="primary" onClick={showModal} className="request-btn">
           Xin giấy
         </Button>
         <Modal
-          title={<Typography variant="h4" component="h1" gutterBottom className="request-title">YÊU CẦU CẤP GIẤY ĐI CHỢ</Typography>}
-          visible={isModalVisible}
+          title={
+            <Typography variant="h4" component="h1" className="request-title">
+              YÊU CẦU CẤP GIẤY ĐI CHỢ
+            </Typography>
+          }
+          open={isModalVisible}
+          okButtonProps={{
+            style: {
+              backgroundColor: "rgb(78, 147, 178)",
+            },
+          }}
+          okText="Gửi yêu cầu"
           onOk={handleOk}
           onCancel={handleCancel}
+          closable={false}
         >
           <div style={{ marginBottom: 16 }}>
             <Input

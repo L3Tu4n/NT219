@@ -13,12 +13,12 @@
 }
 
 .signed-row {
-  background-color: #d5d5d5 !important;
+  background-color: #efefef;
   cursor: not-allowed;
 }
 
-.signed-row:hover {
-  background-color: #f0f0f0 !important;
+.unsigned-row {
+  background-color: #ffffff;
 }
 
 .styled-button {
@@ -67,10 +67,6 @@
 .ant-pagination .ant-pagination-item-active:hover {
   border-color: rgb(109, 184, 219) !important;
   background-color: rgb(78, 147, 178) !important;
-}
-
-.ant-pagination .ant-pagination-item-active:hover a {
-  color: white;
 }
 
 .ant-pagination-prev,

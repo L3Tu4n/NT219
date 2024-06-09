@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Button, Tag } from "antd";
 import "../../styles/AdminHome.css";
 
@@ -10,22 +10,22 @@ const columns = [
     width: 150,
   },
   {
-    title: "Tên",
-    dataIndex: "name",
-    key: "name",
-    width: 200,
-  },
-  {
     title: "Căn cước công dân",
     dataIndex: "idNumber",
     key: "idNumber",
+    width: 180,
+  },
+  {
+    title: "Di chuyển từ",
+    dataIndex: "from",
+    key: "from",
     width: 200,
   },
   {
-    title: "Giới tính",
-    dataIndex: "gender",
-    key: "gender",
-    width: 100,
+    title: "Điểm đến",
+    dataIndex: "to",
+    key: "to",
+    width: 200,
   },
   {
     title: "Trạng thái",
@@ -52,89 +52,77 @@ const columns = [
   },
 ];
 
-const initialData = [
-  {
-    key: "1",
-    marketPassId: "MP001",
-    name: "Nguyễn Văn A",
-    idNumber: "123456789",
-    gender: "Nam",
-    status: "Chưa ký",
-  },
-  {
-    key: "2",
-    marketPassId: "MP002",
-    name: "Trần Thị B",
-    idNumber: "987654321",
-    gender: "Nữ",
-    status: "Chưa ký",
-  },
-  {
-    key: "3",
-    marketPassId: "MP002",
-    name: "Trần Thị B",
-    idNumber: "987654321",
-    gender: "Nữ",
-    status: "Chưa ký",
-  },
-  {
-    key: "4",
-    marketPassId: "MP002",
-    name: "Trần Thị B",
-    idNumber: "987654321",
-    gender: "Nữ",
-    status: "Chưa ký",
-  },
-  {
-    key: "5",
-    marketPassId: "MP002",
-    name: "Trần Thị B",
-    idNumber: "987654321",
-    gender: "Nữ",
-    status: "Chưa ký",
-  },
-  {
-    key: "6",
-    marketPassId: "MP002",
-    name: "Trần Thị B",
-    idNumber: "987654321",
-    gender: "Nữ",
-    status: "Chưa ký",
-  },
-  {
-    key: "7",
-    marketPassId: "MP002",
-    name: "Trần Thị B",
-    idNumber: "987654321",
-    gender: "Nữ",
-    status: "Chưa ký",
-  },
-  {
-    key: "8",
-    marketPassId: "MP002",
-    name: "Trần Thị B",
-    idNumber: "987654321",
-    gender: "Nữ",
-    status: "Chưa ký",
-  },
-];
-
 const AdminHome = () => {
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState([]);
 
-  const handleSign = (key) => {
-    setData((prevData) =>
-      prevData.map((item) =>
-        item.key === key
-          ? { ...item, status: item.status === "Chưa ký" ? "Đã ký" : "Chưa ký" }
-          : item
-      )
-    );
+  useEffect(() => {
+    loadAllGdc();
+  }, []);
+
+  const loadAllGdc = async () => {
+    const response = await fetch(`http://localhost:8000/load_all_gdc`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+    const gdcList = await response.json();
+
+    if (!Array.isArray(gdcList)) {
+      return;
+    }
+
+    const newData = gdcList.map((gdc, index) => ({
+      key: (index + 1).toString(),
+      marketPassId: gdc.gdc_Id,
+      idNumber: gdc.cccd,
+      from: gdc.start_place,
+      to: gdc.destination_place,
+      status: gdc.signature ? "Đã ký" : "Chưa ký",
+    }));
+
+    newData.sort((a, b) => (a.status === "Chưa ký" ? -1 : 1));
+
+    setData(newData);
+  };
+
+  const handleSign = async (record) => {
+    const signData = {
+      gdc_Id: record.marketPassId,
+      CP_username: localStorage.getItem("cccd"),
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/sign", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify(signData),
+      });
+      const responseData = await response.json();
+
+      if (response.status === 200) {
+        setData((prevData) => {
+          const updatedData = prevData.map((item) =>
+            item.key === record.key ? { ...item, status: "Đã ký" } : item
+          );
+
+          updatedData.sort((a, b) => (a.status === "Chưa ký" ? -1 : 1));
+
+          return updatedData;
+        });
+      } else {
+        console.error("Failed to sign:", responseData);
+      }
+    } catch (error) {
+      console.error("Failed to sign:", error);
+    }
   };
 
   const dataWithActions = data.map((item) => ({
     ...item,
-    onClick: () => handleSign(item.key),
+    onClick: () => handleSign(item),
   }));
 
   return (
@@ -144,7 +132,7 @@ const AdminHome = () => {
         dataSource={dataWithActions}
         pagination={{ pageSize: 7 }}
         rowClassName={(record) =>
-          record.status === "Đã ký" ? "signed-row" : ""
+          record.status === "Đã ký" ? "signed-row" : "unsigned-row"
         }
       />
     </div>

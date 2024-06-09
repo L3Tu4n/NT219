@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./styles/index.css";
+import "./styles/Index.css";
 import App from "./views/App";
 import reportWebVitals from "./reportWebVitals";
 import { store } from "./redux/store";

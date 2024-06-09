@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../../styles/SignUp.css";
+import { useNavigate } from "react-router-dom";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { message } from "antd";
 
@@ -25,6 +26,7 @@ function SignUpForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreeTermsError, setAgreeTermsError] = useState(false);
+  const navigate = useNavigate();
 
   const handleChangeSignUp = (e) => {
     let targetName, targetValue;
@@ -72,7 +74,7 @@ function SignUpForm() {
   };
 
   const [canShowMessage, setCanShowMessage] = useState(true);
-  const handleSignUpSubmit = (e) => {
+  const handleSignUpSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = { ...formErrorSignUp };
@@ -113,10 +115,56 @@ function SignUpForm() {
       setAgreeTermsError(false);
     }
 
-    if (
-      hasError ||
-      Object.values(formDataSignUp).every((value) => value.trim() === "")
-    ) {
+    if (!hasError) {
+      try {
+        const response = await fetch("http://localhost:8000/signup/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cccd: formDataSignUp.CCCD,
+            password: formDataSignUp.Password,
+            name: formDataSignUp.FirstAndLastName,
+            gender: formDataSignUp.Gender,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          if (typeof errorData.detail === "object") {
+            message.error(JSON.stringify(errorData.detail));
+          } else {
+            message.error(errorData.detail);
+          }
+        } else {
+          message.success("Đăng ký thành công");
+          localStorage.setItem("cccd", formDataSignUp.CCCD);
+
+          const loginResponse = await fetch("http://localhost:8000/token", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: formDataSignUp.CCCD,
+              password: formDataSignUp.Password,
+            }),
+          });
+
+          if (!loginResponse.ok) {
+            const loginErrorData = await loginResponse.json();
+            message.error(loginErrorData.detail);
+          } else {
+            const loginData = await loginResponse.json();
+            localStorage.setItem("access_token", loginData.access_token);
+            navigate("/Request");
+          }
+        }
+      } catch (error) {
+        message.error("Có lỗi xảy ra khi đăng ký");
+      }
+    } else {
       if (canShowMessage) {
         setCanShowMessage(false);
         message.error("Vui lòng nhập đầy đủ thông tin");

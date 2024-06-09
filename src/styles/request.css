@@ -2,6 +2,10 @@
   position: relative;
 }
 
+.request-title {
+  margin-bottom: 16px;
+}
+
 .request-button-container {
   position: absolute;
   bottom: 16px;
@@ -23,3 +27,17 @@
   color: #a6a6a6;
 }
 
+.pass-signed-row {
+  background-color: #ffffff;
+}
+
+.pass-unsigned-row {
+  background-color: #efefef;
+  cursor: not-allowed;
+}
+
+.request-btn {
+  background-color: rgb(78, 147, 178);
+  color: white;
+  border: none;
+}

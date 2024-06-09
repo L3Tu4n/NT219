@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { logIn, logOut } from "../../redux/actions";
 import { Link } from "react-router-dom";
 import "../../styles/Header.css";
 import { Avatar } from "antd";
@@ -9,25 +7,40 @@ import { UserOutlined } from "@ant-design/icons";
 
 const ShowHeader = () => {
   const navigate = useNavigate();
-  var isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-  const username = useSelector((state) => state.user.username);
-  const dispatch = useDispatch();
 
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!localStorage.getItem("access_token")
+  );
+  const [username, setUsername] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    const username = localStorage.getItem("username");
-    if (isLoggedIn) {
-      dispatch(logIn(username));
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      fetch("http://localhost:8000/users/me/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.name) {
+            setIsLoggedIn(true);
+            setUsername(data.name);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching user", error);
+        });
     }
-  }, [dispatch]);
+  }, []);
 
   const handleNormalLogOut = () => {
-    dispatch(logOut());
-    localStorage.setItem("isLoggedIn", "false");
-    localStorage.removeItem("username");
+    setIsLoggedIn(false);
+    setUsername(null);
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("cccd");
     navigate("/");
   };
 
@@ -35,7 +48,10 @@ const ShowHeader = () => {
     <header className="header">
       <div className="desktop" style={{ display: "flex" }}>
         <div className="logo">
-          <Link className="logo-link" to="/">
+          <Link
+            className="logo-link"
+            onClick={() => navigate(isLoggedIn ? "/Request" : "/")}
+          >
             Giấy đi chợ
           </Link>
         </div>
@@ -47,7 +63,12 @@ const ShowHeader = () => {
                   className="user-button"
                   onClick={() => setDropdownVisible(!dropdownVisible)}
                 >
-                  <Avatar size="small" icon={<UserOutlined />} /> {username}
+                  <Avatar
+                    size="small"
+                    icon={<UserOutlined />}
+                    style={{ marginBottom: "4px" }}
+                  />{" "}
+                  {username}
                 </button>
                 {dropdownVisible && (
                   <div
