@@ -41,7 +41,6 @@ function SignInForm() {
     }));
   };
 
-  // const navigate = useNavigate();
   const [canShowMessage, setCanShowMessage] = useState(true);
 
   const handleSubmitSignIn = (e) => {
@@ -81,6 +80,8 @@ function SignInForm() {
         setTimeout(() => setCanShowMessage(true), 500);
       }
     } else {
+      console.log(formDataSignIn);
+
       fetch("http://localhost:8000/token", {
         method: "POST",
         headers: {
@@ -104,9 +105,9 @@ function SignInForm() {
               .then((userData) => {
                 localStorage.setItem("cccd", userData.cccd);
                 if (userData.user_type === "chingsphu") {
-                  navigate("/Admin");
+                  navigate("/sign");
                 } else {
-                  navigate("/Request");
+                  navigate("/request");
                 }
               });
           } else {
@@ -178,7 +179,7 @@ function SignInForm() {
 
       <div className="signup-link">
         <span>Chưa có tài khoản? </span>
-        <a href="/SignUp">Đăng ký</a>
+        <a href="/signup">Đăng ký</a>
       </div>
     </form>
   );

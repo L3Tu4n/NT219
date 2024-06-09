@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import "../../styles/Header.css";
 import { Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import { message } from "antd";
 
 const ShowHeader = () => {
   const navigate = useNavigate();
@@ -23,7 +24,12 @@ const ShowHeader = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
         .then((data) => {
           if (data.name) {
             setIsLoggedIn(true);
@@ -31,10 +37,17 @@ const ShowHeader = () => {
           }
         })
         .catch((error) => {
-          console.error("Error fetching user", error);
+          message.error("Phiên đăng nhập đã hết hạn!");
+          setIsLoggedIn(false);
+          setUsername(null);
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("cccd");
+          if (error.message === "Unauthorized") {
+            navigate("/");
+          }
         });
     }
-  }, []);
+  }, [navigate]);
 
   const handleNormalLogOut = () => {
     setIsLoggedIn(false);
@@ -50,7 +63,7 @@ const ShowHeader = () => {
         <div className="logo">
           <Link
             className="logo-link"
-            onClick={() => navigate(isLoggedIn ? "/Request" : "/")}
+            onClick={() => navigate(isLoggedIn ? "/request" : "/")}
           >
             Giấy đi chợ
           </Link>
@@ -82,7 +95,7 @@ const ShowHeader = () => {
               </div>
             ) : (
               <button className="auth-button">
-                <Link to="/SignIn">Đăng nhập | Đăng ký</Link>
+                <Link to="/signin">Đăng nhập | Đăng ký</Link>
               </button>
             )}
           </div>

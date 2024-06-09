@@ -4,6 +4,7 @@ import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import Home from "../pages/Home/Home.jsx";
 import Admin from "../pages/Admin/Admin.jsx";
 import Request from "../pages/RequestGet/Request.jsx"
+import Verify from "../pages/Verify/Verify.jsx";
 
 export const routes = [
   {
@@ -12,17 +13,17 @@ export const routes = [
     isShowHeader: true,
   },
   {
-    path: "/SignUp",
+    path: "/signup",
     page: SignUp,
     isShowHeader: false,
   },
   {
-    path: "/SignIn",
+    path: "/signin",
     page: SignIn,
     isShowHeader: false,
   },
   {
-    path: "/Admin",
+    path: "/sign",
     page: Admin,
     isShowHeader: true,
   },
@@ -31,7 +32,11 @@ export const routes = [
     page: NotFoundPage,
   },
   {
-    path: "/Request",
+    path: "/verify/:gdc_id",
+    page: Verify,
+  },
+  {
+    path: "/request",
     page: Request,
     isShowHeader: true,
   },

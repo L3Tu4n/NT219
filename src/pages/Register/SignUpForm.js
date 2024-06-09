@@ -158,7 +158,7 @@ function SignUpForm() {
           } else {
             const loginData = await loginResponse.json();
             localStorage.setItem("access_token", loginData.access_token);
-            navigate("/Request");
+            navigate("/request");
           }
         }
       } catch (error) {
@@ -355,7 +355,7 @@ function SignUpForm() {
 
       <div className="login-link">
         <span>Đã có tài khoản? </span>
-        <a href="/SignIn">Đăng nhập</a>
+        <a href="/signin">Đăng nhập</a>
       </div>
     </form>
   );

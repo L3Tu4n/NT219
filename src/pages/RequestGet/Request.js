@@ -145,7 +145,7 @@ const Request = () => {
         rowClassName={(record) =>
           record.status === "Đã ký" ? "pass-signed-row" : "pass-unsigned-row"
         }
-        locale={{ emptyText: <Typography>No data</Typography> }}
+        locale={{ emptyText: <Typography>Chưa có giấy đi chợ</Typography> }}
       />
       <div className="request-button-container">
         <Button type="primary" onClick={showModal} className="request-btn">
