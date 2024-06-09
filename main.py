@@ -3,8 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from falcon_signature import FalconSignature
-from pydantic import BaseModel
-from models import User, ChingsPhu
+from models import User, ChingsPhu, LoginForm, SignModel, RequestSignModel
 from database import user_collection, gdc_collection, chingsphu_collection
 from database_collections import create_user, create_chingsphu
 import os
@@ -25,19 +24,6 @@ app.add_middleware(
 )
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-class LoginForm(BaseModel):
-    username: str
-    password: str
-    
-class SignModel(BaseModel):
-    gdc_Id: str
-    CP_username: str
-
-class RequestSignModel(BaseModel):
-    cccd: str
-    start_place: str
-    destination_place: str
 
 @app.post("/signup/")
 async def signup(user: User):

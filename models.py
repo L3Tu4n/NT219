@@ -25,3 +25,16 @@ class GDC(BaseModel):
 class LoginForm(BaseModel):
     username: str = Field(..., description="The username of the account (CCCD for user, CP_username for ChingsPhu)")
     password: str = Field(..., description="The password of the account")
+
+class LoginForm(BaseModel):
+    username: str
+    password: str
+    
+class SignModel(BaseModel):
+    gdc_Id: str
+    CP_username: str
+
+class RequestSignModel(BaseModel):
+    cccd: str
+    start_place: str
+    destination_place: str
