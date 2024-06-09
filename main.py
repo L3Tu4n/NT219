@@ -139,7 +139,7 @@ async def sign(sign_data: SignModel, token: str = Depends(oauth2_scheme)):
                 
         await gdc_collection.update_one({"gdc_Id": sign_data.gdc_Id}, {"$set": update_data})
 
-        verification_url = f"http://localhost:8000/verify/{gdc_id}"
+        verification_url = f"http://localhost:3000/verify/{gdc_id}"
         qr_code_path = "qr_code.png"
         generate_qr_code(verification_url, qr_code_path)
 
@@ -197,7 +197,17 @@ async def verify(gdc_id: str):
         falcon = FalconSignature()
         is_valid = await falcon.verify_pdf(gdc_id, signed_pdf_path, user_info, chingsphu_info, road_info)
         if is_valid:
-            return JSONResponse(status_code=200, content={"Status": "Success", "Message": "Signature verified successfully!"})
+            sign_date = datetime.now().strftime("%d/%m/%Y %H:%M")
+            return JSONResponse(status_code=200, content={
+                "Status": "Success", 
+                "Message": "Signature verified successfully!",
+                "cccd": user_info["cccd"],
+                "start_place": road_info["start_place"],
+                "destination_place": road_info["destination_place"],
+                "chingsphu_name": chingsphu_info["name"],
+                "sign_date": sign_date,
+                "sign_place": chingsphu_info["sign_place"]
+            })
         else:
             return JSONResponse(status_code=200, content={"Status": "Error", "Message": "Signature verification failed!"})
     except HTTPException as e:
